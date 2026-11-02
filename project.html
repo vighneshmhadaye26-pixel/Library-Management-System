@@ -1,0 +1,366 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Library Management System</title>
+
+<style>
+body 
+{
+    font-family: Mongolian Baiti;
+    margin: 0;
+    background: url("https://images.unsplash.com/photo-1524995997946-a1c2e315a42f")
+    no-repeat center center fixed;
+    background-size: cover;
+}
+
+#welcomeSection
+{
+    text-align: center;
+    padding-top: 120px;
+}
+
+#welcomeSection img
+{
+    width: 500px;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: 0 0 15px black;
+    transition: 0.3s;
+}
+
+#welcomeSection img:hover
+{
+    transform: scale(1.05);
+}
+
+.container 
+{
+    width: 700px;
+    margin: 40px auto;
+    background: rgba(255,255,255,0.95);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px black;
+}
+
+h2 
+{
+    text-align: center;
+}
+
+input 
+{
+    width: 98%;
+    padding: 8px;
+    margin: 5px 0;
+}
+
+button 
+{
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    background: #4ca1af;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover 
+{
+    background: #2c3e50;
+}
+
+table 
+{
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
+}
+
+th, td 
+{
+    border: 1px solid black;
+    padding: 5px;
+    text-align: center;
+}
+
+#loginSection, #mainSection 
+{
+    display: none;
+}
+
+footer 
+{
+    text-align: center;
+    padding: 10px;
+    color: white;
+    font-size: 14px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Welcome Section -->
+
+<div id="welcomeSection">
+
+    <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da"
+         onclick="showLogin()">
+
+    <h2 style="color:white;">
+        Click Image to Enter Library System
+    </h2>
+
+</div>
+
+
+<!-- Login Section -->
+
+<div class="container" id="loginSection">
+
+    <h2>Library Admin Login</h2>
+
+    <input type="text" id="username" placeholder="Username">
+
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="login()">Login</button>
+
+</div>
+
+
+<!-- Main Library Section -->
+
+<div class="container" id="mainSection">
+
+    <h2>Library Management System</h2>
+
+    <input type="text" id="bookId" placeholder="Book ID">
+
+    <input type="text" id="bookName" placeholder="Book Name">
+
+    <input type="text" id="author" placeholder="Author Name">
+
+    <button onclick="addBook()">Add Book</button>
+
+    <button onclick="logout()">Logout</button>
+
+    <table id="bookTable">
+
+        <tr>
+            <th>Book ID</th>
+            <th>Book Name</th>
+            <th>Author</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+
+    </table>
+
+</div>
+
+
+<script>
+
+// Load saved books from localStorage
+let books = JSON.parse(localStorage.getItem("books")) || [];
+
+
+// Show Login Section
+
+function showLogin()
+{
+    document.getElementById("welcomeSection").style.display = "none";
+
+    document.getElementById("loginSection").style.display = "block";
+}
+
+
+// Login Function
+
+function login()
+{
+    let user = document.getElementById("username").value;
+
+    let pass = document.getElementById("password").value;
+
+    if(user === "admin" && pass === "1234")
+    {
+        document.getElementById("loginSection").style.display = "none";
+
+        document.getElementById("mainSection").style.display = "block";
+
+        displayBooks();
+    }
+    else
+    {
+        alert("Invalid Login!");
+    }
+}
+
+
+// Add Book Function
+
+function addBook()
+{
+    let id = document.getElementById("bookId").value;
+
+    let name = document.getElementById("bookName").value;
+
+    let author = document.getElementById("author").value;
+
+
+    if(id == "" || name == "" || author == "")
+    {
+        alert("Please fill all fields!");
+
+        return;
+    }
+
+
+    let book =
+    {
+        id: id,
+        name: name,
+        author: author,
+        status: "Available"
+    };
+
+
+    books.push(book);
+
+
+    // Save books automatically
+    localStorage.setItem("books", JSON.stringify(books));
+
+
+    displayBooks();
+
+
+    // Clear input fields
+
+    document.getElementById("bookId").value = "";
+
+    document.getElementById("bookName").value = "";
+
+    document.getElementById("author").value = "";
+
+}
+
+
+// Display Books Function
+
+function displayBooks()
+{
+    let table = document.getElementById("bookTable");
+
+
+    table.innerHTML = `
+        <tr>
+            <th>Book ID</th>
+            <th>Book Name</th>
+            <th>Author</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    `;
+
+
+    books.forEach((book, index) =>
+    {
+        table.innerHTML += `
+        <tr>
+            <td>${book.id}</td>
+
+            <td>${book.name}</td>
+
+            <td>${book.author}</td>
+
+            <td>${book.status}</td>
+
+            <td>
+                <button onclick="toggleStatus(${index})">
+                    Issue/Return
+                </button>
+
+                <button onclick="deleteBook(${index})">
+                    Delete
+                </button>
+            </td>
+        </tr>
+        `;
+    });
+
+}
+
+
+// Issue / Return Function
+
+function toggleStatus(index)
+{
+    if(books[index].status === "Available")
+    {
+        books[index].status = "Issued";
+    }
+    else
+    {
+        books[index].status = "Available";
+    }
+
+
+    // Save updated status
+    localStorage.setItem("books", JSON.stringify(books));
+
+
+    displayBooks();
+}
+
+
+// Delete Book Function
+
+function deleteBook(index)
+{
+    books.splice(index, 1);
+
+
+    // Save updated book list
+    localStorage.setItem("books", JSON.stringify(books));
+
+
+    displayBooks();
+}
+
+
+// Logout Function
+
+function logout()
+{
+    document.getElementById("mainSection").style.display = "none";
+
+    document.getElementById("welcomeSection").style.display = "block";
+
+    document.getElementById("username").value = "";
+
+    document.getElementById("password").value = "";
+}
+
+
+// Display saved books when page loads
+
+displayBooks();
+
+</script>
+
+
+<footer>
+    &#169; 2026 Library Management System | Developed by Vighnesh Mhadaye
+</footer>
+
+</body>
+</html>
